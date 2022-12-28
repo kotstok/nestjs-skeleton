@@ -11,7 +11,9 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "@project/*": ["/*"],
+      "@project/*": [
+        "src/*"
+      ]
     },
     "incremental": true,
     "skipLibCheck": true,
