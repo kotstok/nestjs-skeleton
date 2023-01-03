@@ -219,6 +219,14 @@ describe('App e2e', () => {
           .withHeaders('Authorization', 'Bearer $S{userToken}')
           .withPathParams('id', '$S{post_id}')
           .expectStatus(HttpStatus.NO_CONTENT));
+
+      it('Should get empty posts', () =>
+        pactum
+          .spec()
+          .get('/post')
+          .withHeaders('Authorization', 'Bearer $S{userToken}')
+          .expectStatus(HttpStatus.OK)
+          .expectJsonLength(0));
     });
   });
 });
