@@ -1,9 +1,21 @@
 version: "3.8"
 services:
-  db:
+  dev-db:
+    container_name: 'nestjs-dev-db'
     image: postgres:${POSTGRES_VERSION}
     ports:
-      - "${DB_PORT}:${DB_PORT}"
+      - "${DB_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    networks:
+      - 'development'
+  test-db:
+    container_name: 'nestjs-test-db'
+    image: postgres:${POSTGRES_VERSION}
+    ports:
+      - "${DB_PORT}:5432"
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}

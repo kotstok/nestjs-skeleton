@@ -52,6 +52,7 @@ export class AuthService {
       createdAt: now,
       updatedAt: now,
     };
+
     const user: Prisma.UserCreateInput = { ...dto, ...data };
 
     try {
