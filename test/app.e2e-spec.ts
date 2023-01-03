@@ -6,6 +6,7 @@ import { AppModule } from '@project/app.module';
 import { PrismaService } from '@project/prisma/prisma.service';
 import { SignupDto } from '@project/auth/dto';
 import { EditUserDto } from '@project/user/dto';
+import { CreatePostDto, EditPostDto } from '@project/post/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -41,6 +42,12 @@ describe('App e2e', () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       return ctx.res.json.access_token || '';
+    });
+
+    pactum.handler.addCaptureHandler('post_id', (ctx) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      return ctx.res.json?.id || 0;
     });
   });
 
@@ -142,10 +149,76 @@ describe('App e2e', () => {
     });
   });
   describe('Pot', () => {
-    describe('Create post', () => {});
-    describe('Get posts', () => {});
-    describe('Get post by id', () => {});
-    describe('Delete post', () => {});
-    describe('Edit post', () => {});
+    const dto: CreatePostDto = {
+      title: 'Post title',
+      content: 'Post content',
+    };
+
+    describe('Create post', () => {
+      it('Should throw unauthorised request', () =>
+        pactum.spec().post('/post').expectStatus(HttpStatus.UNAUTHORIZED));
+
+      it('Should create post', () =>
+        pactum
+          .spec()
+          .post('/post')
+          .withHeaders('Authorization', 'Bearer $S{userToken}')
+          .withBody(dto)
+          .expectStatus(HttpStatus.CREATED)
+          .expectBodyContains(dto.title)
+          .expectBodyContains(dto.content)
+          .expectBodyContains('id')
+          .stores('post_id', '#post_id'));
+    });
+
+    describe('Get posts', () => {
+      it('Should get all user posts', () =>
+        pactum
+          .spec()
+          .get('/post')
+          .withHeaders('Authorization', 'Bearer $S{userToken}')
+          .expectStatus(HttpStatus.OK)
+          .expectJsonLength(1));
+
+      it('Should get post by id', () =>
+        pactum
+          .spec()
+          .get('/post/{id}')
+          .withHeaders('Authorization', 'Bearer $S{userToken}')
+          .withPathParams('id', '$S{post_id}')
+          .expectStatus(HttpStatus.OK)
+          .expectBodyContains(dto.title)
+          .expectBodyContains(dto.content)
+          .expectBodyContains('id'));
+    });
+
+    describe('Edit post', () => {
+      it('Should throw unauthorised request', () =>
+        pactum.spec().post('/post').expectStatus(HttpStatus.UNAUTHORIZED));
+
+      const dto: EditPostDto = {
+        title: 'Updated title',
+      };
+
+      it('Should edit post by id', () =>
+        pactum
+          .spec()
+          .patch('/post/{id}')
+          .withHeaders('Authorization', 'Bearer $S{userToken}')
+          .withPathParams('id', '$S{post_id}')
+          .withBody(dto)
+          .expectStatus(HttpStatus.OK)
+          .expectBodyContains(dto.title));
+    });
+
+    describe('Delete post', () => {
+      it('Should delete post by id', () =>
+        pactum
+          .spec()
+          .delete('/post/{id}')
+          .withHeaders('Authorization', 'Bearer $S{userToken}')
+          .withPathParams('id', '$S{post_id}')
+          .expectStatus(HttpStatus.NO_CONTENT));
+    });
   });
 });

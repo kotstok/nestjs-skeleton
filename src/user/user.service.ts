@@ -9,7 +9,7 @@ export class UserService {
   async editUser(uid: number, dto: EditUserDto) {
     const user = await this.prisma.user.update({
       where: { id: uid },
-      data: { ...dto },
+      data: { ...dto, updatedAt: new Date() },
     });
 
     delete user.passwd;
